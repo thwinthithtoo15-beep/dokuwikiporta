@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dokuwikiporta | The Open Knowledge</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        :root { 
+            --brand-color: #36618f; 
+            --bg-sidebar: #f4f4f4;
+        }
+        body { max-width: 1000px; margin: auto; padding: 20px; line-height: 1.6; }
+        header { border-bottom: 3px solid var(--brand-color); padding-bottom: 10px; margin-bottom: 30px; }
+        .main-container { display: flex; gap: 30px; }
+        .sidebar { flex: 1; background: var(--bg-sidebar); padding: 15px; border-radius: 8px; height: fit-content; }
+        .content-area { flex: 3; }
+        #wiki-display { background: #ffffff; padding: 10px 25px; border: 1px solid #eee; border-radius: 8px; }
+        footer { margin-top: 50px; text-align: center; font-size: 0.85em; color: #666; border-top: 1px solid #eee; padding-top: 20px; }
+        @media (max-width: 768px) { .main-container { flex-direction: column; } .sidebar { order: 2; } .content-area { order: 1; } }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>🌐 Dokuwikiporta</h1>
+    <p><em>Independent. Decentralized. Freedom of Information.</em></p>
+</header>
+
+<div class="main-container">
+    <aside class="sidebar">
+        <h3>Navigation</h3>
+        <nav id="sidebar-nav">
+            <ul style="list-style: none; padding: 0;">
+                <li><a href="#" onclick="loadPage('home')">🏠 Home</a></li>
+                <li><a href="#" onclick="loadPage('manifesto')">📜 Manifesto</a></li>
+                <li><a href="#" onclick="loadPage('guide')">🛠 User Guide</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <article class="content-area">
+        <div id="wiki-display">Loading Knowledge Base...</div>
+    </article>
+</div>
+
+<footer>
+    <p><strong>Dokuwikiporta</strong> - A gift to the world by Thwin.</p>
+    <p>Licensed under <a href="https://opensource.org/licenses/MIT">MIT License</a>. No Tracking. No Ads. No Profit.</p>
+</footer>
+
+<script>
+    const wikiData = {
+        home: `# Welcome to Dokuwikiporta\nThis is a **Decentralized Knowledge Base**.`,
+        manifesto: `# The Dokuwikiporta Manifesto\n1. Information must be free.`,
+        guide: `# User Guide\nYou can now use external files like .md, .txt, or .html!`
+    };
+
+    async function loadPage(id) {
+        const display = document.getElementById('wiki-display');
+        display.innerHTML = "Fetching knowledge...";
+
+        const extensions = ['.md', '.txt', '.html'];
+        let content = null;
+        let loadedExt = '';
+
+        for (let ext of extensions) {
+            try {
+                const response = await fetch(id + ext);
+                if (response.ok) {
+                    content = await response.text();
+                    loadedExt = ext;
+                    break; 
+                }
+            } catch (e) {}
+        }
+
+        if (!content) {
+            content = wikiData[id];
+        }
+
+        if (content) {
+            if (loadedExt === '.html') {
+                display.innerHTML = content;
+            } else {
+                display.innerHTML = marked.parse(content);
+            }
+        } else {
+            display.innerHTML = "# 404\nKnowledge not found. Please create the file or add to wikiData.";
+        }
+        
+        window.scrollTo(0, 0);
+    }
+
+    window.onload = () => loadPage('home');
+</script>
+</body>
+</html>
